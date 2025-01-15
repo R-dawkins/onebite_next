@@ -4,36 +4,42 @@ import { ReactNode } from "react";
 import books from "@/mock/books.json";
 import BookItem from "@/components/book-item";
 import { InferGetServerSidePropsType } from "next";
+import fetchBooks from "@/lib/fetch-books";
+import fetchRandomBooks from "@/lib/fetch-random-books";
 
 // next에서 약속된 함수인 getServerSideProps와 같은 함수를 내보내면 해당 페이지는 SSR로 동작하게 된다.
-export const getServerSideProps = () => {
+export const getServerSideProps = async () => {
   // 컴포넌트보다 먼저 실행되어서, 컴포넌트에 필요한 데이터를 불러오는 함수
   // window.location과 같이 윈도우 객체에 접근하려 해도 reference Error가 발생한다. (서버 사이드에서만 동작하여 window 객체를 찾을 수 없음)
-  const data = "hello";
+
+  const [allBooks, recoBooks] = await Promise.all([
+    fetchBooks(),
+    fetchRandomBooks(),
+  ]);
+  // Promise.all을 사용하면 Promise.all([배열]) 배열안의 함수들이 병렬로 작동하게 된다. (동시에 fetch)
   return {
-    props: {
-      data,
-    },
+    props: { allBooks, recoBooks },
   };
 };
 // InferGetServerSidePropsType<typeof getServerSideProps> 이 타입은 getServerSideProps의 반환값 타입을 자동으로 추론해주는 타입이다.
 export default function Home({
-  data,
+  allBooks,
+  recoBooks,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   // SSR로 동작할 때 컴포넌트는 처음 서버에서 한번, 그리고 브라우저에 JS 번들링하여 넘겨질때 (hydration) 한번 총 2번 실행되는 것을 유의
   // 그렇기 때문에 window.location과 같이 윈도우 객체에 접근하려고 하면 처음 서버에서 실행될 때 reference Error가 발생한다.
-  // useEffect를 사용하면
+  // useEffect를 사용하면 해결가능
   return (
     <div className={style.container}>
       <section>
         <h3>지금 추천하는 도서</h3>
-        {books.map((book) => (
+        {recoBooks.map((book) => (
           <BookItem key={book.id} {...book} />
         ))}
       </section>
       <section>
         <h3>등록된 모든 도서</h3>
-        {books.map((book) => (
+        {allBooks.map((book) => (
           <BookItem key={book.id} {...book} />
         ))}
       </section>
