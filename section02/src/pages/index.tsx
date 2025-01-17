@@ -6,6 +6,7 @@ import BookItem from "@/components/book-item";
 import { InferGetStaticPropsType } from "next";
 import fetchBooks from "@/lib/fetch-books";
 import fetchRandomBooks from "@/lib/fetch-random-books";
+import Head from "next/head"; /* _document 파일에서만 next/docmuent로부터 불러옴 */
 /* 
   SSR (서버 사이드 렌더링) : 클라이언트의 요청마다 매번 새로 페이지를 생성(JS실행)하여 응답
   
@@ -28,7 +29,6 @@ export const getStaticProps = async () => {
     fetchRandomBooks(),
   ]);
   // Promise.all을 사용하면 Promise.all([배열]) 배열안의 함수들이 병렬로 작동하게 된다. (동시에 fetch)
-  console.log("인덱스 페이지");
   return {
     props: { allBooks, recoBooks },
     //revalidate: 3,
@@ -44,20 +44,31 @@ export default function Home({
   // 그렇기 때문에 window.location과 같이 윈도우 객체에 접근하려고 하면 처음 서버에서 실행될 때 reference Error가 발생한다.
   // useEffect를 사용하면 해결가능
   return (
-    <div className={style.container}>
-      <section>
-        <h3>지금 추천하는 도서</h3>
-        {recoBooks.map((book) => (
-          <BookItem key={book.id} {...book} />
-        ))}
-      </section>
-      <section>
-        <h3>등록된 모든 도서</h3>
-        {allBooks.map((book) => (
-          <BookItem key={book.id} {...book} />
-        ))}
-      </section>
-    </div>
+    <>
+      <Head>
+        <title>한입북스</title>
+        <meta property="og:image" content="/thumbnail.png" />
+        <meta property="og:title" content="한입북스" />
+        <meta
+          property="og:description"
+          content="한입 북스에 등록된 도서들을 만나보세요."
+        />
+      </Head>
+      <div className={style.container}>
+        <section>
+          <h3>지금 추천하는 도서</h3>
+          {recoBooks.map((book) => (
+            <BookItem key={book.id} {...book} />
+          ))}
+        </section>
+        <section>
+          <h3>등록된 모든 도서</h3>
+          {allBooks.map((book) => (
+            <BookItem key={book.id} {...book} />
+          ))}
+        </section>
+      </div>
+    </>
   );
 }
 // 자바스크립트의 함수는 객체이기 때문에 Home.getLayout과 같이 메서드도 추가가 가능하다
