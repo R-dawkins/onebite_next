@@ -1,4 +1,16 @@
+import { notFound } from "next/navigation";
 import style from "./page.module.css";
+
+/*
+  export const dynamicParams = false; 
+  generateStaticParams에 해당하는 파라미터가 없다면 모두 not found로 연결
+  현재 코드로 예를들어 id 1,2,3 이외 모든 파라미터는 not found로 연결되는것
+*/
+
+// 빌드타임에 파라미터를 읽어서 해당하는 페이지를 정적으로 생성하는 함수(약속됨)
+export function generateStaticParams() {
+  return [{ id: "1" }, { id: "2" }, { id: "3" }];
+}
 
 export default async function Page({
   params,
@@ -12,6 +24,9 @@ export default async function Page({
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${pid}`
   );
   if (!response.ok) {
+    if (response.status === 404) {
+      notFound();
+    }
     return <div>오류가 발생했습니다...</div>;
   }
   const book = await response.json();
