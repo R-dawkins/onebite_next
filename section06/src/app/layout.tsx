@@ -5,8 +5,7 @@ import { BookData } from "@/types";
 
 async function Footer() {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`,
-    { cache: "force-cache" }
+    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book`
   );
   if (!response.ok) {
     return <footer>제작 @winterlood</footer>;
